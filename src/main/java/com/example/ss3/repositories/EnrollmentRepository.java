@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class EnrollmentRepository {
@@ -29,14 +30,14 @@ public class EnrollmentRepository {
         return enrollments;
     }
 
-    public Enrollment findById(int id){
-        if(id <= 0) return null;
+    public Optional<Enrollment> findById(int id){
+        if(id <= 0) return Optional.empty();
         for(Enrollment enrollment : enrollments){
             if(enrollment.getId() == id){
-                return enrollment;
+                return Optional.of(enrollment);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public Enrollment add(Enrollment enrollment){
@@ -44,7 +45,7 @@ public class EnrollmentRepository {
             return null;
         }
         // Kiểm tra trùng lặp ID
-        if(findById(enrollment.getId()) != null){
+        if(findById(enrollment.getId()).isPresent()){
             return null;
         }
         // Kiểm tra tên học viên không để trống
@@ -56,7 +57,7 @@ public class EnrollmentRepository {
             return null;
         }
         // Kiểm tra courseId có tồn tại trong hệ thống không
-        if(courseRepository != null && courseRepository.findById(enrollment.getCourseId()) == null){
+        if(courseRepository != null && courseRepository.findById(enrollment.getCourseId()).isEmpty()){
             return null;
         }
 
@@ -66,8 +67,7 @@ public class EnrollmentRepository {
 
     public boolean update(int id, Enrollment enrollment){
         if(id <= 0 || enrollment == null) return false;
-        Enrollment oldEnrollment = findById(id);
-        if(oldEnrollment == null) return false;
+        Enrollment oldEnrollment = findById(id).orElseThrow(() -> new RuntimeException("Enrollment not found"));
 
         // Validate dữ liệu cập nhật
         if(enrollment.getStudentName() == null || enrollment.getStudentName().trim().isEmpty()){
@@ -76,7 +76,7 @@ public class EnrollmentRepository {
         if(enrollment.getCourseId() <= 0){
             return false;
         }
-        if(courseRepository != null && courseRepository.findById(enrollment.getCourseId()) == null){
+        if(courseRepository != null && courseRepository.findById(enrollment.getCourseId()).isEmpty()){
             return false;
         }
 
@@ -87,10 +87,7 @@ public class EnrollmentRepository {
 
     public boolean delete(int id){
         if(id <= 0) return false;
-        Enrollment oldEnrollment = findById(id);
-        if(oldEnrollment != null){
-            return enrollments.remove(oldEnrollment);
-        }
-        return false;
+        Enrollment oldEnrollment = findById(id).orElseThrow(() -> new RuntimeException("Enrollment not found"));
+        return enrollments.remove(oldEnrollment);
     }
 }

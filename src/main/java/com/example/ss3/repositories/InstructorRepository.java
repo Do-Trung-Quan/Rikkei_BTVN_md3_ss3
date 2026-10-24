@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class InstructorRepository {
@@ -19,21 +20,21 @@ public class InstructorRepository {
         return instructors;
     }
 
-    public Instructor findById(int id){
-        if(id <= 0) return null;
+    public Optional<Instructor> findById(int id){
+        if(id <= 0) return Optional.empty();
         for(Instructor instructor : instructors){
             if(instructor.getId() == id){
-                return instructor;
+                return Optional.of(instructor);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public Instructor add(Instructor instructor){
         if(instructor == null || instructor.getId() <= 0){
             return null;
         }
-        if(findById(instructor.getId()) != null){
+        if(findById(instructor.getId()).isPresent()){
             return null;
         }
         if(instructor.getName() == null || instructor.getName().trim().isEmpty()){
@@ -48,8 +49,7 @@ public class InstructorRepository {
 
     public boolean update(int id, Instructor instructor){
         if(id <= 0 || instructor == null) return false;
-        Instructor oldInstructor = findById(id);
-        if(oldInstructor == null) return false;
+        Instructor oldInstructor = findById(id).orElseThrow(() -> new RuntimeException("Instructor not found"));
 
         if(instructor.getName() == null || instructor.getName().trim().isEmpty()){
             return false;
@@ -65,10 +65,7 @@ public class InstructorRepository {
 
     public boolean delete(int id){
         if(id <= 0) return false;
-        Instructor oldInstructor = findById(id);
-        if(oldInstructor != null){
-            return instructors.remove(oldInstructor);
-        }
-        return false;
+        Instructor oldInstructor = findById(id).orElseThrow(() -> new RuntimeException("Instructor not found"));
+        return instructors.remove(oldInstructor);
     }
 }

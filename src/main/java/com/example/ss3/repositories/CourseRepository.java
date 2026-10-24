@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class CourseRepository {
@@ -29,14 +30,14 @@ public class CourseRepository {
         return courses;
     }
 
-    public Course findById(int id){
-        if(id <= 0) return null;
+    public Optional<Course> findById(int id){
+        if(id <= 0) return Optional.empty();
         for(Course course : courses){
             if(course.getId() == id){
-                return course;
+                return Optional.of(course);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public Course add(Course course){
@@ -44,7 +45,7 @@ public class CourseRepository {
             return null;
         }
         // Kiểm tra trùng lặp ID
-        if(findById(course.getId()) != null){
+        if(findById(course.getId()).isPresent()){
             return null;
         }
         // Kiểm tra title không để trống
@@ -56,7 +57,7 @@ public class CourseRepository {
             return null;
         }
         // Kiểm tra instructorId có tồn tại trong hệ thống không
-        if(instructorRepository != null && instructorRepository.findById(course.getInstructorId()) == null){
+        if(instructorRepository != null && instructorRepository.findById(course.getInstructorId()).isEmpty()){
             return null;
         }
 
@@ -66,8 +67,7 @@ public class CourseRepository {
 
     public boolean update(int id, Course course){
         if(id <= 0 || course == null) return false;
-        Course oldCourse = findById(id);
-        if(oldCourse == null) return false;
+        Course oldCourse = findById(id).orElseThrow(() -> new RuntimeException("Course not found"));
 
         // Validate dữ liệu cập nhật
         if(course.getTitle() == null || course.getTitle().trim().isEmpty()){
@@ -76,7 +76,7 @@ public class CourseRepository {
         if(course.getInstructorId() <= 0){
             return false;
         }
-        if(instructorRepository != null && instructorRepository.findById(course.getInstructorId()) == null){
+        if(instructorRepository != null && instructorRepository.findById(course.getInstructorId()).isEmpty()){
             return false;
         }
 
@@ -88,10 +88,7 @@ public class CourseRepository {
 
     public boolean delete(int id){
         if(id <= 0) return false;
-        Course oldCourse = findById(id);
-        if(oldCourse != null){
-            return courses.remove(oldCourse);
-        }
-        return false;
+        Course oldCourse = findById(id).orElseThrow(() -> new RuntimeException("Course not found"));
+        return courses.remove(oldCourse);
     }
 }

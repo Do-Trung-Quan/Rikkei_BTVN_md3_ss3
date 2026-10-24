@@ -33,6 +33,17 @@ public class InstructorController {
         return ResponseEntity.ok(ApiResponse.success("Trả về danh sách instructor thành công", instructorService.findAll()));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<Instructor>> findById(
+            @PathVariable int id
+    ){
+        try{
+            return ResponseEntity.ok(ApiResponse.success("trả về instructor thành công", instructorService.findById(id)));
+        }catch(Exception e){
+            return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<Instructor>> create(
             @RequestBody Instructor instructor

@@ -33,6 +33,17 @@ public class EnrollmentController {
         return ResponseEntity.ok(ApiResponse.success("Trả về danh sách enrollment thành công", enrollmentService.findAll()));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<Enrollment>> findById(
+            @PathVariable int id
+    ){
+        try{
+            return ResponseEntity.ok(ApiResponse.success("Trả về enrollment thành công", enrollmentService.findById(id)));
+        }catch(Exception e){
+            return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<Enrollment>> create(
             @RequestBody Enrollment enrollment
@@ -49,20 +60,25 @@ public class EnrollmentController {
             @PathVariable int id,
             @RequestBody Enrollment enrollment
     ){
-        if(enrollmentService.findById(id) == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Không tìm thấy enrollment"));
+        try{
+            boolean res = enrollmentService.update(id, enrollment);
+            if(res) return ResponseEntity.ok(ApiResponse.success("Cập nhật enrollment thành công", enrollment));
+            return ResponseEntity.badRequest().body(ApiResponse.error("Cập nhật enrollment thất bại"));
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(e.getMessage()));
         }
-        boolean res = enrollmentService.update(id, enrollment);
-        if(res) return ResponseEntity.ok(ApiResponse.success("Cập nhật enrollment thành công", enrollment));
-        return ResponseEntity.badRequest().body(ApiResponse.error("Cập nhật enrollment thất bại"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable int id
     ){
-        boolean res = enrollmentService.delete(id);
-        if(res) return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Xóa enrollment thành công"));
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Không tìm thấy enrollment"));
+        try{
+            boolean res = enrollmentService.delete(id);
+            if(res) return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Xóa enrollment thành công"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Không tìm thấy enrollment"));
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(e.getMessage()));
+        }
     }
 }

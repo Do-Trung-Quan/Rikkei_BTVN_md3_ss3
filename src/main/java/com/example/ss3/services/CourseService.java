@@ -24,8 +24,11 @@ public class CourseService {
     }
 
     public Course findById(int id){
-        if(id <= 0) return null;
-        return courseRepository.findById(id);
+        return courseRepository.findById(id).orElseThrow(() -> new RuntimeException("Course not found"));
+    }
+
+    public Course findCourseById(int id){
+        return findById(id);
     }
 
     public Course create(Course course){
@@ -36,7 +39,7 @@ public class CourseService {
         if(course.getId() <= 0) return null;
 
         // Kiểm tra id chưa tồn tại
-        if(courseRepository.findById(course.getId()) != null){
+        if(courseRepository.findById(course.getId()).isPresent()){
             return null;
         }
 
@@ -51,7 +54,7 @@ public class CourseService {
         }
 
         // Kiểm tra instructorId phải tồn tại trong InstructorRepository
-        if(instructorRepository.findById(course.getInstructorId()) == null){
+        if(instructorRepository.findById(course.getInstructorId()).isEmpty()){
             return null;
         }
 
@@ -60,10 +63,7 @@ public class CourseService {
 
     public boolean update(int id, Course course){
         // Kiểm tra id và đối tượng null
-        if(id <= 0 || course == null) return false;
-
-        // Kiểm tra course cần update có tồn tại trong repository không
-        if(courseRepository.findById(id) == null) return false;
+        if(id <= 0 || course == null || courseRepository.findById(id).isEmpty()) return false;
 
         // Kiểm tra title không được để trống
         if(course.getTitle() == null || course.getTitle().trim().isEmpty()){
@@ -76,7 +76,7 @@ public class CourseService {
         }
 
         // Kiểm tra instructorId phải tồn tại trong InstructorRepository
-        if(instructorRepository.findById(course.getInstructorId()) == null){
+        if(instructorRepository.findById(course.getInstructorId()).isEmpty()){
             return false;
         }
 
@@ -86,7 +86,7 @@ public class CourseService {
 
     public boolean delete(int id){
         // Kiểm tra id hợp lệ và tồn tại
-        if(id <= 0 || courseRepository.findById(id) == null) return false;
+        if(id <= 0 || courseRepository.findById(id).isEmpty()) return false;
 
         return courseRepository.delete(id);
     }

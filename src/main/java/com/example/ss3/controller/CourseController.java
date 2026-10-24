@@ -33,6 +33,17 @@ public class CourseController {
         return ResponseEntity.ok(ApiResponse.success("Trả về danh sách course thành công", courseService.findAll()));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<Course>> findById(
+            @PathVariable int id
+    ){
+        try{
+            return ResponseEntity.ok(ApiResponse.success("Trả về course thành công", courseService.findById(id)));
+        }catch(Exception e){
+            return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<Course>> create(
             @RequestBody Course course
@@ -49,20 +60,25 @@ public class CourseController {
             @PathVariable int id,
             @RequestBody Course course
     ){
-        if(courseService.findById(id) == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Không tìm thấy course"));
+        try{
+            boolean res = courseService.update(id, course);
+            if(res) return ResponseEntity.ok(ApiResponse.success("Cập nhật course thành công", course));
+            return ResponseEntity.badRequest().body(ApiResponse.error("Cập nhật course thất bại"));
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(e.getMessage()));
         }
-        boolean res = courseService.update(id, course);
-        if(res) return ResponseEntity.ok(ApiResponse.success("Cập nhật course thành công", course));
-        return ResponseEntity.badRequest().body(ApiResponse.error("Cập nhật course thất bại"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable int id
     ){
-        boolean res = courseService.delete(id);
-        if(res) return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Xóa course thành công"));
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Không tìm thấy course"));
+        try{
+            boolean res = courseService.delete(id);
+            if(res) return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Xóa course thành công"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Không tìm thấy course"));
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(e.getMessage()));
+        }
     }
 }
