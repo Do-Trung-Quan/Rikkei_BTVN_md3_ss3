@@ -1,13 +1,22 @@
 package com.example.ss3.controller;
 
-import com.example.ss3.models.Instructor;
-import com.example.ss3.services.InstructorService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.example.ss3.dto.ApiResponse;
+import com.example.ss3.models.Instructor;
+import com.example.ss3.services.InstructorService;
 
 @RestController
 @RequestMapping("/api/v1/instructors")
@@ -20,40 +29,37 @@ public class InstructorController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Instructor>> list(){
-        return ResponseEntity.ok(instructorService.findAll());
+    public ResponseEntity<ApiResponse<List<Instructor>>> list(){
+        return ResponseEntity.ok(ApiResponse.success("Trả về danh sách instructor thành công", instructorService.findAll()));
     }
 
     @PostMapping
-    public ResponseEntity<Instructor> create(
+    public ResponseEntity<ApiResponse<Instructor>> create(
             @RequestBody Instructor instructor
     ){
         Instructor created = instructorService.create(instructor);
         if(created == null){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(ApiResponse.error("Lỗi khi thêm mới instructor"));
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("thêm mới thành công", created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Instructor> update(
+    public ResponseEntity<ApiResponse<Instructor>> update(
             @PathVariable int id,
             @RequestBody Instructor instructor
     ){
-        if(instructorService.findById(id) == null){
-            return ResponseEntity.notFound().build();
-        }
         boolean res = instructorService.update(id, instructor);
-        if(res) return ResponseEntity.ok(instructor);
-        return ResponseEntity.badRequest().build();
+        if(res) return ResponseEntity.ok(ApiResponse.success("Cập nhật instructor thành công", instructor));
+        return ResponseEntity.badRequest().body(ApiResponse.error("Cập nhật instructor thất bại"));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable int id
     ){
         boolean res = instructorService.delete(id);
-        if(res) return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        return ResponseEntity.notFound().build();
+        if(res) return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Xóa instructor thành công"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Không tìm thấy instructor"));
     }
 }
