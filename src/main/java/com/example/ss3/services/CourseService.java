@@ -4,6 +4,7 @@ import com.example.ss3.dto.PageResponse;
 import com.example.ss3.dto.mapper.CourseMapper;
 import com.example.ss3.dto.request.CourseCreateRequest;
 import com.example.ss3.dto.response.CourseResponse;
+import com.example.ss3.dto.response.CourseResponseV2;
 import com.example.ss3.models.Course;
 import com.example.ss3.models.CourseStatus;
 import com.example.ss3.models.Instructor;
@@ -38,7 +39,7 @@ public class CourseService {
         return courseMapper.toCourseResponseList(courseList);
     }
 
-    public PageResponse<CourseResponse> getPageCourses(int page, int size, String sortBy, Sort.Direction direction, CourseStatus status){
+    public PageResponse<CourseResponseV2> getPageCourses(int page, int size, String sortBy, Sort.Direction direction, CourseStatus status){
         page = Math.max(page, 0);
         size = Math.max(size, 0);
         if(sortBy == null || sortBy.trim().isEmpty()) sortBy = "id";
@@ -49,11 +50,11 @@ public class CourseService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         //Lấy ra Page<Course> và map sang Page<CourseResponse>
-        Page<Course> coursePage = courseRepository.findAllByStatus(status, pageable);
-        Page<CourseResponse> courseResponsePage = coursePage.map(courseMapper::toCourseResponse);
+        Page<CourseResponseV2> courseResponsePage = courseRepository.findAllByStatusV2(status, pageable);
+//        Page<CourseResponse> courseResponsePage = coursePage.map(courseMapper::toCourseResponse);
 
         //map sang PageResponse<CourseResponse>
-        return new PageResponse<CourseResponse>(
+        return new PageResponse<CourseResponseV2>(
             courseResponsePage.getContent(),
             courseResponsePage.getNumber(),
             courseResponsePage.getSize(),
