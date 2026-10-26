@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.ss3.dto.PageResponse;
 import com.example.ss3.dto.request.CourseCreateRequest;
 import com.example.ss3.dto.response.CourseResponse;
+import com.example.ss3.models.CourseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -30,9 +31,10 @@ public class CourseController {
             @RequestParam (value = "page", defaultValue = "0") int page,
             @RequestParam (value = "size", defaultValue = "10") int size,
             @RequestParam (value = "sortBy", required = false) String sortBy,
-            @RequestParam (value = "direction", defaultValue = "DESC") Sort.Direction direction
-    ) {
-        return ResponseEntity.ok(ApiResponse.success("Trả về danh sách course thành công", courseService.getPageCourses(page, size, sortBy, direction)));
+            @RequestParam (value = "direction", defaultValue = "DESC") Sort.Direction direction,
+            @RequestParam (value = "status", required = false, defaultValue = "ACTIVE") CourseStatus status
+            ) {
+        return ResponseEntity.ok(ApiResponse.success("Trả về danh sách course thành công", courseService.getPageCourses(page, size, sortBy, direction, status)));
     }
 
     @GetMapping("/{id}")
