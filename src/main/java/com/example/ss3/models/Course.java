@@ -1,13 +1,10 @@
 package com.example.ss3.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "courses")
@@ -23,33 +20,30 @@ public class Course {
     @Enumerated(EnumType.STRING)
     private CourseStatus status;
 
-    @Column(nullable = false)
-    private Long instructorId;
+    @ManyToOne
+    @JoinColumn(name = "instructor_id")
+    private Instructor instructor;
+
+    @OneToMany(mappedBy = "course")
+    @JsonIgnore
+    private List<StudentEnrollment> enrollments = new ArrayList<>();
 
     public Course() {
     }
 
-    public Course(Long id, String title, CourseStatus status, Long instructorId) {
+    public Course(Long id, String title, CourseStatus status, Instructor instructor) {
         this.id = id;
         this.title = title;
         this.status = status;
-        this.instructorId = instructorId;
+        this.instructor = instructor;
     }
 
-    public Long getInstructorId() {
-        return instructorId;
+    public Long getId() {
+        return id;
     }
 
-    public void setInstructorId(Long instructorId) {
-        this.instructorId = instructorId;
-    }
-
-    public CourseStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(CourseStatus status) {
-        this.status = status;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -60,11 +54,27 @@ public class Course {
         this.title = title;
     }
 
-    public Long getId() {
-        return id;
+    public CourseStatus getStatus() {
+        return status;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setStatus(CourseStatus status) {
+        this.status = status;
+    }
+
+    public Instructor getInstructor() {
+        return instructor;
+    }
+
+    public void setInstructor(Instructor instructor) {
+        this.instructor = instructor;
+    }
+
+    public List<StudentEnrollment> getEnrollments() {
+        return enrollments;
+    }
+
+    public void setEnrollments(List<StudentEnrollment> enrollments) {
+        this.enrollments = enrollments;
     }
 }

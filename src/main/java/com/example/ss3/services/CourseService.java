@@ -53,13 +53,13 @@ public class CourseService {
             return null;
         }
 
-        // Kiểm tra instructorId hợp lệ (> 0)
-        if(course.getInstructorId() == null || course.getInstructorId() <= 0){
+        // Kiểm tra instructor hợp lệ
+        if(course.getInstructor() == null || course.getInstructor().getId() == null || course.getInstructor().getId() <= 0){
             return null;
         }
 
-        // Kiểm tra instructorId phải tồn tại trong InstructorRepository
-        if(instructorRepository.findById(course.getInstructorId()).isEmpty()){
+        // Kiểm tra instructor phải tồn tại trong InstructorRepository
+        if(instructorRepository.findById(course.getInstructor().getId()).isEmpty()){
             return null;
         }
 
@@ -80,13 +80,13 @@ public class CourseService {
             return false;
         }
 
-        // Kiểm tra instructorId hợp lệ (> 0)
-        if(course.getInstructorId() == null || course.getInstructorId() <= 0){
+        // Kiểm tra instructor hợp lệ
+        if(course.getInstructor() == null || course.getInstructor().getId() == null || course.getInstructor().getId() <= 0){
             return false;
         }
 
-        // Kiểm tra instructorId phải tồn tại trong InstructorRepository
-        if(instructorRepository.findById(course.getInstructorId()).isEmpty()){
+        // Kiểm tra instructor phải tồn tại trong InstructorRepository
+        if(instructorRepository.findById(course.getInstructor().getId()).isEmpty()){
             return false;
         }
 
