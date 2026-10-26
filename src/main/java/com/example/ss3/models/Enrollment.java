@@ -1,24 +1,39 @@
 package com.example.ss3.models;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "enrollments")
 public class Enrollment {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
     private String studentName;
-    private int courseId;
+
+    @Column(nullable = false)
+    private Long courseId;
 
     public Enrollment() {
     }
 
-    public Enrollment(int id, String studentName, int courseId) {
+    public Enrollment(Long id, String studentName, Long courseId) {
         this.id = id;
         this.studentName = studentName;
         this.courseId = courseId;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -30,11 +45,11 @@ public class Enrollment {
         this.studentName = studentName;
     }
 
-    public int getCourseId() {
+    public Long getCourseId() {
         return courseId;
     }
 
-    public void setCourseId(int courseId) {
+    public void setCourseId(Long courseId) {
         this.courseId = courseId;
     }
 }

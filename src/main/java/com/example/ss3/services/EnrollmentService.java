@@ -23,11 +23,11 @@ public class EnrollmentService {
         return enrollmentRepository.findAll();
     }
 
-    public Enrollment findById(int id){
+    public Enrollment findById(Long id){
         return enrollmentRepository.findById(id).orElseThrow(() -> new RuntimeException("Enrollment not found"));
     }
 
-    public Enrollment findEnrollmentById(int id){
+    public Enrollment findEnrollmentById(Long id){
         return findById(id);
     }
 
@@ -36,7 +36,7 @@ public class EnrollmentService {
         if(enrollment == null) return null;
 
         // Kiểm tra id hợp lệ (> 0)
-        if(enrollment.getId() <= 0) return null;
+        if(enrollment.getId() == null || enrollment.getId() <= 0) return null;
 
         // Kiểm tra id chưa tồn tại
         if(enrollmentRepository.findById(enrollment.getId()).isPresent()){
@@ -49,7 +49,7 @@ public class EnrollmentService {
         }
 
         // Kiểm tra courseId hợp lệ (> 0)
-        if(enrollment.getCourseId() <= 0){
+        if(enrollment.getCourseId() == null || enrollment.getCourseId() <= 0){
             return null;
         }
 
@@ -61,9 +61,9 @@ public class EnrollmentService {
         return enrollmentRepository.add(enrollment);
     }
 
-    public boolean update(int id, Enrollment enrollment){
+    public boolean update(Long id, Enrollment enrollment){
         // Kiểm tra id và đối tượng null
-        if(id <= 0 || enrollment == null || enrollmentRepository.findById(id).isEmpty()) return false;
+        if(id == null || id <= 0 || enrollment == null || enrollmentRepository.findById(id).isEmpty()) return false;
 
         // Kiểm tra tên học viên không được để trống
         if(enrollment.getStudentName() == null || enrollment.getStudentName().trim().isEmpty()){
@@ -71,7 +71,7 @@ public class EnrollmentService {
         }
 
         // Kiểm tra courseId hợp lệ (> 0)
-        if(enrollment.getCourseId() <= 0){
+        if(enrollment.getCourseId() == null || enrollment.getCourseId() <= 0){
             return false;
         }
 
@@ -84,9 +84,9 @@ public class EnrollmentService {
         return enrollmentRepository.update(id, enrollment);
     }
 
-    public boolean delete(int id){
+    public boolean delete(Long id){
         // Kiểm tra id hợp lệ và tồn tại
-        if(id <= 0 || enrollmentRepository.findById(id).isEmpty()) return false;
+        if(id == null || id <= 0 || enrollmentRepository.findById(id).isEmpty()) return false;
 
         return enrollmentRepository.delete(id);
     }

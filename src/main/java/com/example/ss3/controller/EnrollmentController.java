@@ -35,7 +35,7 @@ public class EnrollmentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Enrollment>> findById(
-            @PathVariable int id
+            @PathVariable Long id
     ){
         try{
             return ResponseEntity.ok(ApiResponse.success("Trả về enrollment thành công", enrollmentService.findById(id)));
@@ -57,7 +57,7 @@ public class EnrollmentController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Enrollment>> update(
-            @PathVariable int id,
+            @PathVariable Long id,
             @RequestBody Enrollment enrollment
     ){
         try{
@@ -71,7 +71,7 @@ public class EnrollmentController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(
-            @PathVariable int id
+            @PathVariable Long id
     ){
         try{
             boolean res = enrollmentService.delete(id);

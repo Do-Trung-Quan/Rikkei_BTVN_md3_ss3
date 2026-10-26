@@ -15,25 +15,25 @@ public class EnrollmentRepository {
 
     public EnrollmentRepository() {
         this.courseRepository = null;
-        enrollments.add(new Enrollment(1, "Nguyen Van A", 1));
-        enrollments.add(new Enrollment(2, "Tran Thi B", 2));
+        enrollments.add(new Enrollment(1L, "Nguyen Van A", 1L));
+        enrollments.add(new Enrollment(2L, "Tran Thi B", 2L));
     }
 
     @Autowired
     public EnrollmentRepository(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
-        enrollments.add(new Enrollment(1, "Nguyen Van A", 1));
-        enrollments.add(new Enrollment(2, "Tran Thi B", 2));
+        enrollments.add(new Enrollment(1L, "Nguyen Van A", 1L));
+        enrollments.add(new Enrollment(2L, "Tran Thi B", 2L));
     }
 
     public List<Enrollment> findAll(){
         return enrollments;
     }
 
-    public Optional<Enrollment> findById(int id){
-        if(id <= 0) return Optional.empty();
+    public Optional<Enrollment> findById(Long id){
+        if(id == null || id <= 0) return Optional.empty();
         for(Enrollment enrollment : enrollments){
-            if(enrollment.getId() == id){
+            if(enrollment.getId() != null && enrollment.getId().equals(id)){
                 return Optional.of(enrollment);
             }
         }
@@ -41,7 +41,7 @@ public class EnrollmentRepository {
     }
 
     public Enrollment add(Enrollment enrollment){
-        if(enrollment == null || enrollment.getId() <= 0){
+        if(enrollment == null || enrollment.getId() == null || enrollment.getId() <= 0){
             return null;
         }
         // Kiểm tra trùng lặp ID
@@ -53,7 +53,7 @@ public class EnrollmentRepository {
             return null;
         }
         // Kiểm tra courseId hợp lệ
-        if(enrollment.getCourseId() <= 0){
+        if(enrollment.getCourseId() == null || enrollment.getCourseId() <= 0){
             return null;
         }
         // Kiểm tra courseId có tồn tại trong hệ thống không
@@ -65,15 +65,15 @@ public class EnrollmentRepository {
         return enrollment;
     }
 
-    public boolean update(int id, Enrollment enrollment){
-        if(id <= 0 || enrollment == null) return false;
+    public boolean update(Long id, Enrollment enrollment){
+        if(id == null || id <= 0 || enrollment == null) return false;
         Enrollment oldEnrollment = findById(id).orElseThrow(() -> new RuntimeException("Enrollment not found"));
 
         // Validate dữ liệu cập nhật
         if(enrollment.getStudentName() == null || enrollment.getStudentName().trim().isEmpty()){
             return false;
         }
-        if(enrollment.getCourseId() <= 0){
+        if(enrollment.getCourseId() == null || enrollment.getCourseId() <= 0){
             return false;
         }
         if(courseRepository != null && courseRepository.findById(enrollment.getCourseId()).isEmpty()){
@@ -85,8 +85,8 @@ public class EnrollmentRepository {
         return true;
     }
 
-    public boolean delete(int id){
-        if(id <= 0) return false;
+    public boolean delete(Long id){
+        if(id == null || id <= 0) return false;
         Enrollment oldEnrollment = findById(id).orElseThrow(() -> new RuntimeException("Enrollment not found"));
         return enrollments.remove(oldEnrollment);
     }

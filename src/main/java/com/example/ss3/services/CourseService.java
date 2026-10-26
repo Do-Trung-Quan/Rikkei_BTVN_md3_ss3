@@ -23,11 +23,11 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
-    public Course findById(int id){
+    public Course findById(Long id){
         return courseRepository.findById(id).orElseThrow(() -> new RuntimeException("Course not found"));
     }
 
-    public Course findCourseById(int id){
+    public Course findCourseById(Long id){
         return findById(id);
     }
 
@@ -36,7 +36,7 @@ public class CourseService {
         if(course == null) return null;
 
         // Kiểm tra id hợp lệ (> 0)
-        if(course.getId() <= 0) return null;
+        if(course.getId() == null || course.getId() <= 0) return null;
 
         // Kiểm tra id chưa tồn tại
         if(courseRepository.findById(course.getId()).isPresent()){
@@ -48,8 +48,13 @@ public class CourseService {
             return null;
         }
 
+        // Kiểm tra status
+        if(course.getStatus() == null){
+            return null;
+        }
+
         // Kiểm tra instructorId hợp lệ (> 0)
-        if(course.getInstructorId() <= 0){
+        if(course.getInstructorId() == null || course.getInstructorId() <= 0){
             return null;
         }
 
@@ -61,17 +66,22 @@ public class CourseService {
         return courseRepository.add(course);
     }
 
-    public boolean update(int id, Course course){
+    public boolean update(Long id, Course course){
         // Kiểm tra id và đối tượng null
-        if(id <= 0 || course == null || courseRepository.findById(id).isEmpty()) return false;
+        if(id == null || id <= 0 || course == null || courseRepository.findById(id).isEmpty()) return false;
 
         // Kiểm tra title không được để trống
         if(course.getTitle() == null || course.getTitle().trim().isEmpty()){
             return false;
         }
 
+        // Kiểm tra status
+        if(course.getStatus() == null){
+            return false;
+        }
+
         // Kiểm tra instructorId hợp lệ (> 0)
-        if(course.getInstructorId() <= 0){
+        if(course.getInstructorId() == null || course.getInstructorId() <= 0){
             return false;
         }
 
@@ -84,9 +94,9 @@ public class CourseService {
         return courseRepository.update(id, course);
     }
 
-    public boolean delete(int id){
+    public boolean delete(Long id){
         // Kiểm tra id hợp lệ và tồn tại
-        if(id <= 0 || courseRepository.findById(id).isEmpty()) return false;
+        if(id == null || id <= 0 || courseRepository.findById(id).isEmpty()) return false;
 
         return courseRepository.delete(id);
     }

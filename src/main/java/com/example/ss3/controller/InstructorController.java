@@ -35,7 +35,7 @@ public class InstructorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Instructor>> findById(
-            @PathVariable int id
+            @PathVariable Long id
     ){
         try{
             return ResponseEntity.ok(ApiResponse.success("trả về instructor thành công", instructorService.findById(id)));
@@ -57,7 +57,7 @@ public class InstructorController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Instructor>> update(
-            @PathVariable int id,
+            @PathVariable Long id,
             @RequestBody Instructor instructor
     ){
         boolean res = instructorService.update(id, instructor);
@@ -67,7 +67,7 @@ public class InstructorController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(
-            @PathVariable int id
+            @PathVariable Long id
     ){
         boolean res = instructorService.delete(id);
         if(res) return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Xóa instructor thành công"));
