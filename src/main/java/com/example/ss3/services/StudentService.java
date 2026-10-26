@@ -1,5 +1,6 @@
 package com.example.ss3.services;
 
+import com.example.ss3.dto.request.StudentCreateRequest;
 import com.example.ss3.models.Student;
 import com.example.ss3.repositories.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,27 +25,33 @@ public class StudentService {
         return studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
     }
 
-    public Student create(Student student) {
-        if (student == null) return null;
-        if (student.getId() == null || student.getId() <= 0) return null;
-        if (studentRepository.findById(student.getId()).isPresent()) return null;
-        if (student.getName() == null || student.getName().trim().isEmpty()) return null;
-        if (student.getEmail() == null || student.getEmail().trim().isEmpty()) return null;
+    public Student create(StudentCreateRequest req) {
+        if (req == null) return null;
+        if (req.getName() == null || req.getName().trim().isEmpty()) return null;
+        if (req.getEmail() == null || req.getEmail().trim().isEmpty()) return null;
 
-        return studentRepository.add(student);
+        Student student = new Student();
+        student.setName(req.getName());
+        student.setEmail(req.getEmail());
+        return studentRepository.save(student);
     }
 
-    public boolean update(Long id, Student student) {
-        if (id == null || id <= 0 || student == null || studentRepository.findById(id).isEmpty()) return false;
-        if (student.getName() == null || student.getName().trim().isEmpty()) return false;
-        if (student.getEmail() == null || student.getEmail().trim().isEmpty()) return false;
+    public boolean update(Long id, StudentCreateRequest req) {
+        if (id == null || id <= 0 || req == null) return false;
+        if (req.getName() == null || req.getName().trim().isEmpty()) return false;
+        if (req.getEmail() == null || req.getEmail().trim().isEmpty()) return false;
 
-        return studentRepository.update(id, student);
+        Student student = studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
+        student.setName(req.getName());
+        student.setEmail(req.getEmail());
+        studentRepository.save(student);
+        return true;
     }
 
     public boolean delete(Long id) {
-        if (id == null || id <= 0 || studentRepository.findById(id).isEmpty()) return false;
+        if (id == null || id <= 0 || !studentRepository.existsById(id)) return false;
 
-        return studentRepository.delete(id);
+        studentRepository.deleteById(id);
+        return true;
     }
 }

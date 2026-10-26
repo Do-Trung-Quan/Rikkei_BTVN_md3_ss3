@@ -1,6 +1,7 @@
 package com.example.ss3.controller;
 
 import com.example.ss3.dto.ApiResponse;
+import com.example.ss3.dto.request.StudentCreateRequest;
 import com.example.ss3.models.Student;
 import com.example.ss3.services.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +36,8 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Student>> create(@RequestBody Student student) {
-        Student created = studentService.create(student);
+    public ResponseEntity<ApiResponse<Student>> create(@RequestBody StudentCreateRequest request) {
+        Student created = studentService.create(request);
         if (created == null) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Lỗi khi thêm mới student"));
         }
@@ -44,10 +45,13 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Student>> update(@PathVariable Long id, @RequestBody Student student) {
+    public ResponseEntity<ApiResponse<Student>> update(@PathVariable Long id, @RequestBody StudentCreateRequest request) {
         try {
-            boolean res = studentService.update(id, student);
-            if (res) return ResponseEntity.ok(ApiResponse.success("Cập nhật student thành công", student));
+            boolean res = studentService.update(id, request);
+            if (res) {
+                Student updated = studentService.findById(id);
+                return ResponseEntity.ok(ApiResponse.success("Cập nhật student thành công", updated));
+            }
             return ResponseEntity.badRequest().body(ApiResponse.error("Cập nhật student thất bại"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(e.getMessage()));

@@ -1,5 +1,8 @@
 package com.example.ss3.services;
 
+import com.example.ss3.dto.request.StudentEnrollmentCreateRequest;
+import com.example.ss3.models.Course;
+import com.example.ss3.models.Student;
 import com.example.ss3.models.StudentEnrollment;
 import com.example.ss3.repositories.CourseRepository;
 import com.example.ss3.repositories.StudentEnrollmentRepository;
@@ -32,55 +35,48 @@ public class StudentEnrollmentService {
         return studentEnrollmentRepository.findById(id).orElseThrow(() -> new RuntimeException("StudentEnrollment not found"));
     }
 
-    public StudentEnrollment create(StudentEnrollment enrollment) {
-        if (enrollment == null) return null;
-        if (enrollment.getId() == null || enrollment.getId() <= 0) return null;
-        if (studentEnrollmentRepository.findById(enrollment.getId()).isPresent()) return null;
+    public StudentEnrollment create(StudentEnrollmentCreateRequest req) {
+        if (req == null) return null;
+        if (req.getStudentId() == null || req.getStudentId() <= 0) return null;
+        if (req.getCourseId() == null || req.getCourseId() <= 0) return null;
 
-        if (enrollment.getStudent() == null || enrollment.getStudent().getId() == null || enrollment.getStudent().getId() <= 0) {
-            return null;
-        }
-        if (enrollment.getCourse() == null || enrollment.getCourse().getId() == null || enrollment.getCourse().getId() <= 0) {
-            return null;
-        }
+        Student student = studentRepository.findById(req.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+        Course course = courseRepository.findById(req.getCourseId())
+                .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        if (studentRepository.findById(enrollment.getStudent().getId()).isEmpty()) {
-            return null;
-        }
-        if (courseRepository.findById(enrollment.getCourse().getId()).isEmpty()) {
-            return null;
-        }
+        StudentEnrollment enrollment = new StudentEnrollment();
+        enrollment.setStudent(student);
+        enrollment.setCourse(course);
 
-        return studentEnrollmentRepository.add(enrollment);
+        return studentEnrollmentRepository.save(enrollment);
     }
 
-    public boolean update(Long id, StudentEnrollment enrollment) {
-        if (id == null || id <= 0 || enrollment == null || studentEnrollmentRepository.findById(id).isEmpty()) {
-            return false;
+    public boolean update(Long id, StudentEnrollmentCreateRequest req) {
+        if (id == null || id <= 0 || req == null) return false;
+
+        StudentEnrollment enrollment = studentEnrollmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("StudentEnrollment not found"));
+
+        if (req.getStudentId() != null && req.getStudentId() > 0) {
+            Student student = studentRepository.findById(req.getStudentId())
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+            enrollment.setStudent(student);
+        }
+        if (req.getCourseId() != null && req.getCourseId() > 0) {
+            Course course = courseRepository.findById(req.getCourseId())
+                    .orElseThrow(() -> new RuntimeException("Course not found"));
+            enrollment.setCourse(course);
         }
 
-        if (enrollment.getStudent() == null || enrollment.getStudent().getId() == null || enrollment.getStudent().getId() <= 0) {
-            return false;
-        }
-        if (enrollment.getCourse() == null || enrollment.getCourse().getId() == null || enrollment.getCourse().getId() <= 0) {
-            return false;
-        }
-
-        if (studentRepository.findById(enrollment.getStudent().getId()).isEmpty()) {
-            return false;
-        }
-        if (courseRepository.findById(enrollment.getCourse().getId()).isEmpty()) {
-            return false;
-        }
-
-        return studentEnrollmentRepository.update(id, enrollment);
+        studentEnrollmentRepository.save(enrollment);
+        return true;
     }
 
     public boolean delete(Long id) {
-        if (id == null || id <= 0 || studentEnrollmentRepository.findById(id).isEmpty()) {
-            return false;
-        }
+        if (id == null || id <= 0 || !studentEnrollmentRepository.existsById(id)) return false;
 
-        return studentEnrollmentRepository.delete(id);
+        studentEnrollmentRepository.deleteById(id);
+        return true;
     }
 }

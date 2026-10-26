@@ -1,14 +1,23 @@
 package com.example.ss3.controller;
 
-import com.example.ss3.dto.ApiResponse;
-import com.example.ss3.models.StudentEnrollment;
-import com.example.ss3.services.StudentEnrollmentService;
+import java.util.List;
+
+import com.example.ss3.dto.request.StudentEnrollmentCreateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.example.ss3.dto.ApiResponse;
+import com.example.ss3.models.StudentEnrollment;
+import com.example.ss3.services.StudentEnrollmentService;
 
 @RestController
 @RequestMapping({"/api/v1/student-enrollments", "/api/v1/enrollments"})
@@ -35,19 +44,29 @@ public class StudentEnrollmentController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<StudentEnrollment>> create(@RequestBody StudentEnrollment enrollment) {
-        StudentEnrollment created = studentEnrollmentService.create(enrollment);
-        if (created == null) {
-            return ResponseEntity.badRequest().body(ApiResponse.error("Lỗi khi thêm mới enrollment"));
+    public ResponseEntity<ApiResponse<StudentEnrollment>> create(@RequestBody StudentEnrollmentCreateRequest request) {
+        try {
+            StudentEnrollment created = studentEnrollmentService.create(request);
+            if (created == null) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("Lỗi khi thêm mới enrollment"));
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Thêm mới enrollment thành công", created));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Thêm mới enrollment thành công", created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<StudentEnrollment>> update(@PathVariable Long id, @RequestBody StudentEnrollment enrollment) {
+    public ResponseEntity<ApiResponse<StudentEnrollment>> update(
+            @PathVariable Long id,
+            @RequestBody StudentEnrollmentCreateRequest request
+    ) {
         try {
-            boolean res = studentEnrollmentService.update(id, enrollment);
-            if (res) return ResponseEntity.ok(ApiResponse.success("Cập nhật enrollment thành công", enrollment));
+            boolean res = studentEnrollmentService.update(id, request);
+            if (res) {
+                StudentEnrollment updated = studentEnrollmentService.findById(id);
+                return ResponseEntity.ok(ApiResponse.success("Cập nhật enrollment thành công", updated));
+            }
             return ResponseEntity.badRequest().body(ApiResponse.error("Cập nhật enrollment thất bại"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(e.getMessage()));

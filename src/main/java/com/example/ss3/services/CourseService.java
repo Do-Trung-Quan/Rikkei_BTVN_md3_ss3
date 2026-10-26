@@ -1,6 +1,8 @@
 package com.example.ss3.services;
 
+import com.example.ss3.dto.request.CourseCreateRequest;
 import com.example.ss3.models.Course;
+import com.example.ss3.models.Instructor;
 import com.example.ss3.repositories.CourseRepository;
 import com.example.ss3.repositories.InstructorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,85 +21,54 @@ public class CourseService {
         this.instructorRepository = instructorRepository;
     }
 
-    public List<Course> findAll(){
+    public List<Course> findAll() {
         return courseRepository.findAll();
     }
 
-    public Course findById(Long id){
+    public Course findById(Long id) {
         return courseRepository.findById(id).orElseThrow(() -> new RuntimeException("Course not found"));
     }
 
-    public Course findCourseById(Long id){
-        return findById(id);
+    public Course create(CourseCreateRequest req) {
+        if (req == null) return null;
+        if (req.getTitle() == null || req.getTitle().trim().isEmpty()) return null;
+        if (req.getStatus() == null) return null;
+        if (req.getInstructorId() == null || req.getInstructorId() <= 0) return null;
+
+        Instructor instructor = instructorRepository.findById(req.getInstructorId())
+                .orElseThrow(() -> new RuntimeException("Instructor not found"));
+
+        Course course = new Course();
+        course.setTitle(req.getTitle());
+        course.setStatus(req.getStatus());
+        course.setInstructor(instructor);
+
+        return courseRepository.save(course);
     }
 
-    public Course create(Course course){
-        // Kiểm tra đối tượng null
-        if(course == null) return null;
+    public boolean update(Long id, CourseCreateRequest req) {
+        if (id == null || id <= 0 || req == null) return false;
+        if (req.getTitle() == null || req.getTitle().trim().isEmpty()) return false;
+        if (req.getStatus() == null) return false;
 
-        // Kiểm tra id hợp lệ (> 0)
-        if(course.getId() == null || course.getId() <= 0) return null;
+        Course course = courseRepository.findById(id).orElseThrow(() -> new RuntimeException("Course not found"));
+        course.setTitle(req.getTitle());
+        course.setStatus(req.getStatus());
 
-        // Kiểm tra id chưa tồn tại
-        if(courseRepository.findById(course.getId()).isPresent()){
-            return null;
+        if (req.getInstructorId() != null && req.getInstructorId() > 0) {
+            Instructor instructor = instructorRepository.findById(req.getInstructorId())
+                    .orElseThrow(() -> new RuntimeException("Instructor not found"));
+            course.setInstructor(instructor);
         }
 
-        // Kiểm tra title không được để trống
-        if(course.getTitle() == null || course.getTitle().trim().isEmpty()){
-            return null;
-        }
-
-        // Kiểm tra status
-        if(course.getStatus() == null){
-            return null;
-        }
-
-        // Kiểm tra instructor hợp lệ
-        if(course.getInstructor() == null || course.getInstructor().getId() == null || course.getInstructor().getId() <= 0){
-            return null;
-        }
-
-        // Kiểm tra instructor phải tồn tại trong InstructorRepository
-        if(instructorRepository.findById(course.getInstructor().getId()).isEmpty()){
-            return null;
-        }
-
-        return courseRepository.add(course);
+        courseRepository.save(course);
+        return true;
     }
 
-    public boolean update(Long id, Course course){
-        // Kiểm tra id và đối tượng null
-        if(id == null || id <= 0 || course == null || courseRepository.findById(id).isEmpty()) return false;
+    public boolean delete(Long id) {
+        if (id == null || id <= 0 || !courseRepository.existsById(id)) return false;
 
-        // Kiểm tra title không được để trống
-        if(course.getTitle() == null || course.getTitle().trim().isEmpty()){
-            return false;
-        }
-
-        // Kiểm tra status
-        if(course.getStatus() == null){
-            return false;
-        }
-
-        // Kiểm tra instructor hợp lệ
-        if(course.getInstructor() == null || course.getInstructor().getId() == null || course.getInstructor().getId() <= 0){
-            return false;
-        }
-
-        // Kiểm tra instructor phải tồn tại trong InstructorRepository
-        if(instructorRepository.findById(course.getInstructor().getId()).isEmpty()){
-            return false;
-        }
-
-        // Cập nhật
-        return courseRepository.update(id, course);
-    }
-
-    public boolean delete(Long id){
-        // Kiểm tra id hợp lệ và tồn tại
-        if(id == null || id <= 0 || courseRepository.findById(id).isEmpty()) return false;
-
-        return courseRepository.delete(id);
+        courseRepository.deleteById(id);
+        return true;
     }
 }
