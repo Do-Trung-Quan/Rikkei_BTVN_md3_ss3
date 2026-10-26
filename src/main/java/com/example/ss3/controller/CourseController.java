@@ -3,20 +3,15 @@ package com.example.ss3.controller;
 import java.util.List;
 
 import com.example.ss3.dto.request.CourseCreateRequest;
+import com.example.ss3.dto.response.CourseResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.ss3.dto.ApiResponse;
-import com.example.ss3.models.Course;
 import com.example.ss3.services.CourseService;
 
 @RestController
@@ -30,12 +25,17 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Course>>> list() {
-        return ResponseEntity.ok(ApiResponse.success("Trả về danh sách course thành công", courseService.findAll()));
+    public ResponseEntity<ApiResponse<Page<CourseResponse>>> list(
+            @RequestParam (value = "page", defaultValue = "0") int page,
+            @RequestParam (value = "size", defaultValue = "10") int size,
+            @RequestParam (value = "sortBy", required = false) String sortBy,
+            @RequestParam (value = "direction", defaultValue = "DESC") Sort.Direction direction
+    ) {
+        return ResponseEntity.ok(ApiResponse.success("Trả về danh sách course thành công", courseService.getPageCourses(page, size, sortBy, direction)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Course>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CourseResponse>> findById(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(ApiResponse.success("Trả về course thành công", courseService.findById(id)));
         } catch (Exception e) {
@@ -44,9 +44,9 @@ public class CourseController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Course>> create(@RequestBody CourseCreateRequest request) {
+    public ResponseEntity<ApiResponse<CourseResponse>> create(@RequestBody CourseCreateRequest request) {
         try {
-            Course created = courseService.create(request);
+            CourseResponse created = courseService.create(request);
             if (created == null) {
                 return ResponseEntity.badRequest().body(ApiResponse.error("Lỗi khi thêm mới course"));
             }
@@ -57,14 +57,14 @@ public class CourseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Course>> update(
+    public ResponseEntity<ApiResponse<CourseResponse>> update(
             @PathVariable Long id,
             @RequestBody CourseCreateRequest request
     ) {
         try {
             boolean res = courseService.update(id, request);
             if (res) {
-                Course updated = courseService.findById(id);
+                CourseResponse updated = courseService.findById(id);
                 return ResponseEntity.ok(ApiResponse.success("Cập nhật course thành công", updated));
             }
             return ResponseEntity.badRequest().body(ApiResponse.error("Cập nhật course thất bại"));

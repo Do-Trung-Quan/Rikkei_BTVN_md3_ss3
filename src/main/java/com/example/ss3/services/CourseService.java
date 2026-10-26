@@ -1,11 +1,17 @@
 package com.example.ss3.services;
 
+import com.example.ss3.dto.mapper.CourseMapper;
 import com.example.ss3.dto.request.CourseCreateRequest;
+import com.example.ss3.dto.response.CourseResponse;
 import com.example.ss3.models.Course;
 import com.example.ss3.models.Instructor;
 import com.example.ss3.repositories.CourseRepository;
 import com.example.ss3.repositories.InstructorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,22 +20,44 @@ import java.util.List;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final InstructorRepository instructorRepository;
+    private final CourseMapper courseMapper;
 
     @Autowired
-    public CourseService(CourseRepository courseRepository, InstructorRepository instructorRepository) {
+    public CourseService(CourseRepository courseRepository,
+                         InstructorRepository instructorRepository,
+                         CourseMapper courseMapper) {
         this.courseRepository = courseRepository;
         this.instructorRepository = instructorRepository;
+        this.courseMapper = courseMapper;
     }
 
-    public List<Course> findAll() {
-        return courseRepository.findAll();
+    public List<CourseResponse> findAll() {
+        List<Course> courseList = courseRepository.findAll();
+        return courseMapper.toCourseResponseList(courseList);
     }
 
-    public Course findById(Long id) {
-        return courseRepository.findById(id).orElseThrow(() -> new RuntimeException("Course not found"));
+    public Page<CourseResponse> getPageCourses(int page, int size, String sortBy, Sort.Direction direction){
+        page = Math.max(page, 0);
+        size = Math.max(size, 0);
+        if(sortBy == null || sortBy.trim().isEmpty()) sortBy = "id";
+        if(direction == null) direction = Sort.Direction.DESC;
+
+        //Tạo sort và Pageable
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        //Lấy ra Page<Course> và map sang Page<CourseResponse>
+        Page<Course> coursePage = courseRepository.findAll(pageable);
+        return coursePage.map(courseMapper::toCourseResponse);
     }
 
-    public Course create(CourseCreateRequest req) {
+    public CourseResponse findById(Long id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        return courseMapper.toCourseResponse(course);
+    }
+
+    public CourseResponse create(CourseCreateRequest req) {
         if (req == null) return null;
         if (req.getTitle() == null || req.getTitle().trim().isEmpty()) return null;
         if (req.getStatus() == null) return null;
@@ -43,7 +71,8 @@ public class CourseService {
         course.setStatus(req.getStatus());
         course.setInstructor(instructor);
 
-        return courseRepository.save(course);
+        Course saved = courseRepository.save(course);
+        return courseMapper.toCourseResponse(saved);    
     }
 
     public boolean update(Long id, CourseCreateRequest req) {
