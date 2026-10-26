@@ -2,6 +2,7 @@ package com.example.ss3.controller;
 
 import java.util.List;
 
+import com.example.ss3.dto.PageResponse;
 import com.example.ss3.dto.request.CourseCreateRequest;
 import com.example.ss3.dto.response.CourseResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<CourseResponse>>> list(
+    public ResponseEntity<ApiResponse<PageResponse<CourseResponse>>> list(
             @RequestParam (value = "page", defaultValue = "0") int page,
             @RequestParam (value = "size", defaultValue = "10") int size,
             @RequestParam (value = "sortBy", required = false) String sortBy,

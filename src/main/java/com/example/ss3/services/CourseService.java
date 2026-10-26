@@ -1,5 +1,6 @@
 package com.example.ss3.services;
 
+import com.example.ss3.dto.PageResponse;
 import com.example.ss3.dto.mapper.CourseMapper;
 import com.example.ss3.dto.request.CourseCreateRequest;
 import com.example.ss3.dto.response.CourseResponse;
@@ -36,7 +37,7 @@ public class CourseService {
         return courseMapper.toCourseResponseList(courseList);
     }
 
-    public Page<CourseResponse> getPageCourses(int page, int size, String sortBy, Sort.Direction direction){
+    public PageResponse<CourseResponse> getPageCourses(int page, int size, String sortBy, Sort.Direction direction){
         page = Math.max(page, 0);
         size = Math.max(size, 0);
         if(sortBy == null || sortBy.trim().isEmpty()) sortBy = "id";
@@ -48,7 +49,17 @@ public class CourseService {
 
         //Lấy ra Page<Course> và map sang Page<CourseResponse>
         Page<Course> coursePage = courseRepository.findAll(pageable);
-        return coursePage.map(courseMapper::toCourseResponse);
+        Page<CourseResponse> courseResponsePage = coursePage.map(courseMapper::toCourseResponse);
+
+        //map sang PageResponse<CourseResponse>
+        return new PageResponse<CourseResponse>(
+            courseResponsePage.getContent(),
+            courseResponsePage.getNumber(),
+            courseResponsePage.getSize(),
+            courseResponsePage.getTotalElements(),
+            courseResponsePage.getTotalPages(),
+            courseResponsePage.isLast()
+        );
     }
 
     public CourseResponse findById(Long id) {
@@ -72,7 +83,7 @@ public class CourseService {
         course.setInstructor(instructor);
 
         Course saved = courseRepository.save(course);
-        return courseMapper.toCourseResponse(saved);    
+        return courseMapper.toCourseResponse(saved);
     }
 
     public boolean update(Long id, CourseCreateRequest req) {
